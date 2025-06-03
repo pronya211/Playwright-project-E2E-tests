@@ -1,7 +1,9 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-import user from '../Fixtures/user.json'; 
+import user from '../fixtures/user.json'; 
 import { faker } from '@faker-js/faker';
+import Application from '../app/index';
+
 
 test.describe.configure({ mode: 'serial' });
 
@@ -12,44 +14,57 @@ user.loginName = faker.internet.username();
 
 test.describe('Registration', () => {
 
+
 test('Registration with empty fields', async ({ page }) => {
+  const app = new Application(page);
+ 
   
-  await page.goto('/');
+  //home page
+  await app.open();
+  //await page.goto('/');
 
   // Expect a text "Welcome to the Automation Test Store!".
-  await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
+  await app.expexctWelcomeText();
+  //await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
   
-  //base page
-  await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
-  await page.getByRole('link', {name:'  Login'}).click();
+  await app.openLoginPage();
+  // await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
+  // await page.getByRole('link', {name:'  Login'}).click();
 
   //login page
-  await expect(page.locator('.heading1')).toHaveText(' Account Login');
-  await page.getByRole('button', { name: 'Continue' }).click();
+  await app.loginPage.expectAccountLoginText();
+  //await expect(page.locator('.heading1')).toHaveText(' Account Login');
+  await app.loginPage.clickContinueButton();
+  //await page.getByRole('button', { name: 'Continue' }).click();
 
   //Registration page
-  await expect(page.getByText(' Create Account')).toBeVisible();
-  
-  await page.getByRole('button', { name: 'Continue' }).click();
+  await app.registrationPage.expectCreateAccountText();
+  //await expect(page.getByText(' Create Account')).toBeVisible();
+  await app.registrationPage.registrationContinueButton();
+  //await page.getByRole('button', { name: 'Continue' }).click();
 
-  await expect(page.locator('.alert.alert-error.alert-danger')).toBeVisible();
-  await expect(page.locator('.alert.alert-error.alert-danger')).toContainText(' Error: You must agree to the Privacy Policy!');
+  await app.registrationPage.expectVisibleSelector();
+  //await expect(page.locator('.alert.alert-error.alert-danger')).toBeVisible();
+  await app.registrationPage.expectMainErrorMessage();
+  //await expect(page.locator('.alert.alert-error.alert-danger')).toContainText(' Error: You must agree to the Privacy Policy!');
  
-  await expect(page.getByText('First Name must be between 1 and 32 characters!')).toBeVisible();
-  await expect(page.getByText('Last Name must be between 1 and 32 characters!')).toBeVisible();
-  await expect(page.getByText('Email Address does not appear to be valid!')).toBeVisible();
-  await expect(page.getByText('Address 1 must be between 3 and 128 characters!')).toBeVisible();
-  await expect(page.getByText('City must be between 3 and 128 characters!')).toBeVisible();
-  await expect(page.getByText('Zip/postal code must be between 3 and 10 characters!')).toBeVisible();
-  await expect(page.getByText('Login name must be alphanumeric only and between 5 and 64 characters!')).toBeVisible();
-  await expect(page.getByText('Password must be between 4 and 20 characters!')).toBeVisible();
+  await app.registrationPage.expectErrorMessages();
+  // await expect(page.getByText('First Name must be between 1 and 32 characters!')).toBeVisible();
+  // await expect(page.getByText('Last Name must be between 1 and 32 characters!')).toBeVisible();
+  // await expect(page.getByText('Email Address does not appear to be valid!')).toBeVisible();
+  // await expect(page.getByText('Address 1 must be between 3 and 128 characters!')).toBeVisible();
+  // await expect(page.getByText('City must be between 3 and 128 characters!')).toBeVisible();
+  // await expect(page.getByText('Zip/postal code must be between 3 and 10 characters!')).toBeVisible();
+  // await expect(page.getByText('Login name must be alphanumeric only and between 5 and 64 characters!')).toBeVisible();
+  // await expect(page.getByText('Password must be between 4 and 20 characters!')).toBeVisible();
 
-  const helpBlocks = page.locator('.form-group.has-error > .help-block');
-  const count = await helpBlocks.count();
+  await app.registrationPage.checkCss();
+  // const helpBlocks = page.locator('.form-group.has-error > .help-block');
+  // const count = await helpBlocks.count();
 
-  for (let i = 0; i < count; i++) {
-    await expect(helpBlocks.nth(i)).toHaveCSS('color', 'rgb(169, 68, 66)');
-  }
+  // for (let i = 0; i < count; i++) {
+  //   await expect(helpBlocks.nth(i)).toHaveCSS('color', 'rgb(169, 68, 66)');
+  // }
 
 });
 
