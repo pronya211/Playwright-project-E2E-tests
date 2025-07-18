@@ -1,99 +1,91 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 import user from '../Fixtures/user.json'; 
+import Application from '../app/index';
 
-
-
+test.describe.configure({ mode: 'serial' });
 
 test.describe('Authorization', () => {
 
-test('Success authorization', async ({ page }) => {
-
-  await page.goto('/');
-
-  // Expect a text "Welcome to the Automation Test Store!".
-  await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
-
-  //base page
-  await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
-  await page.getByRole('link', {name:'  Login'}).click();
-
-    //login page
-  await expect(page.locator('.heading1')).toHaveText(' Account Login');
-  await page.locator('#loginFrm_loginname').fill(user.loginName);
-  await page.locator('#loginFrm_password').fill(user.password);
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page.locator('.subtext')).toHaveText(user.firstName);
-
-});
-
-
 test('Authorization with empty fields', async ({ page }) => {
+  const app = new Application(page);
 
-  await page.goto('/');
+  await app.open();
 
   // Expect a text "Welcome to the Automation Test Store!".
-  await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
+  await app.expexctWelcomeText();
 
   //base page
-  await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
-  await page.getByRole('link', {name:'  Login'}).click();
+  await app.openLoginPage();
 
-    //login page
-  await expect(page.locator('.heading1')).toHaveText(' Account Login');
-  
-  await page.getByRole('button', { name: 'Login' }).click();
+  //login page
+  await app.authorizationPage.expectAccountLoginText();
+  await app.authorizationPage.clickLoginButton();
 
-  await expect(page.locator('.alert.alert-error.alert-danger')).toBeVisible();
-  await expect(page.locator('.alert.alert-error.alert-danger')).toContainText(' Error: Incorrect login or password provided.');
-  
-
+  await app.authorizationPage.expectAuthorizationErrorMessage();
 });
 
 test('Authorization with empty "Login Name" field', async ({ page }) => {
+  const app = new Application(page);
 
-  await page.goto('/');
+  await app.open();
 
   // Expect a text "Welcome to the Automation Test Store!".
-  await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
+  await app.expexctWelcomeText();
 
   //base page
-  await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
-  await page.getByRole('link', {name:'  Login'}).click();
+  await app.openLoginPage();
 
-    //login page
-  await expect(page.locator('.heading1')).toHaveText(' Account Login');
+  //login page
+  await app.authorizationPage.expectAccountLoginText();
   
-  await page.locator('#loginFrm_loginname').fill(user.loginName);
-  await page.getByRole('button', { name: 'Login' }).click(); 
+  await app.authorizationPage.authorizationWithEmptyLoginNameField(user);
 
-  await expect(page.locator('.alert.alert-error.alert-danger')).toBeVisible();
-  await expect(page.locator('.alert.alert-error.alert-danger')).toContainText(' Error: Incorrect login or password provided.');
-  
+  await app.authorizationPage.clickLoginButton();
 
+  await app.authorizationPage.expectAuthorizationErrorMessage();
 });
 
 test('Authorization with empty "Password" field', async ({ page }) => {
+  const app = new Application(page);
 
-  await page.goto('/');
+  await app.open();
 
   // Expect a text "Welcome to the Automation Test Store!".
-  await expect(page.getByText('Welcome to the Automation Test Store! ')).toBeVisible();
+  await app.expexctWelcomeText();
 
   //base page
-  await page.locator('#main_menu_top').getByText('Account Login Check Your Order').hover();
-  await page.getByRole('link', {name:'  Login'}).click();
+  await app.openLoginPage();
 
-    //login page
-  await expect(page.locator('.heading1')).toHaveText(' Account Login');
+  //login page
+  await app.authorizationPage.expectAccountLoginText();
   
-  await page.locator('#loginFrm_password').fill(user.password);
-  await page.getByRole('button', { name: 'Login' }).click(); 
+  await app.authorizationPage.authorizationWithEmptyPasswordField(user);
 
-  await expect(page.locator('.alert.alert-error.alert-danger')).toBeVisible();
-  await expect(page.locator('.alert.alert-error.alert-danger')).toContainText(' Error: Incorrect login or password provided.');
-  
+  await app.authorizationPage.clickLoginButton();
 
+  await app.authorizationPage.expectAuthorizationErrorMessage();
+});
+
+test('Success authorization', async ({ page }) => {
+  const app = new Application(page);
+
+  await app.open();
+
+  // Expect a text "Welcome to the Automation Test Store!".
+  await app.expexctWelcomeText();
+
+  //base page
+  await app.openLoginPage();
+
+  //login page
+  await app.authorizationPage.expectAccountLoginText();
+
+  await app.authorizationPage.successAuthorization(user);
+
+  await app.authorizationPage.clickLoginButton();
+
+  await app.accountPage.expectLoginNameFromAccountPage(user);
 });
 
 });
